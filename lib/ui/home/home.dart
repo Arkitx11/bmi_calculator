@@ -1,93 +1,124 @@
+import 'package:bmi_calculator/models/calculation.dart';
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: WeightSelector(),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: HeightPicker(),
-          ),
-        ],
-      ),
-    );
+    return Consumer<CalculationModel>(builder: (context, calculation, child) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: WeightSelector(
+                  calculation.weightInteger,
+                  calculation.weightDecimal,
+                  calculation.onWeightIntegerChange,
+                  calculation.onWeightDecimalChange),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child:
+                  HeightPicker(calculation.height, calculation.onHeightChange),
+            ),
+            BmiResult(calculation.calculateBMI())
+          ],
+        ),
+      );
+    });
   }
 }
 
-class WeightSelector extends StatefulWidget {
-  const WeightSelector({super.key});
+class WeightSelector extends StatelessWidget {
+  final int integerValue;
+  final int decimalValue;
+  final Function(int) onIntegerValueChange;
+  final Function(int) onDecimalValueChange;
 
-  @override
-  State<WeightSelector> createState() => _WeightSelectorState();
-}
-
-class _WeightSelectorState extends State<WeightSelector> {
-  int integerValue = 60;
-  int decimalValue = 0;
+  const WeightSelector(this.integerValue, this.decimalValue,
+      this.onIntegerValueChange, this.onDecimalValueChange,
+      {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisSize: MainAxisSize.min,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
-      children: [Text('Weight'),
-        SizedBox(width: 24),
-        SizedBox(height: 100,width: 60,
-          child: NumberPicker(minValue: 30, maxValue: 300, value: integerValue, onChanged: (int value) {
-            setState(() {
-              integerValue = value;
-            });
-          })
+      children: [
+        const Text('Weight'),
+        const SizedBox(width: 24),
+        SizedBox(
+            height: 100,
+            width: 60,
+            child: NumberPicker(
+                minValue: 30,
+                maxValue: 300,
+                value: integerValue,
+                onChanged: (int value) {
+                  onIntegerValueChange(value);
+                })),
+        const Text(
+          '.',
         ),
-        Text('.', ),
-        SizedBox(height: 120,width: 60,
-            child: NumberPicker(minValue: 0, maxValue: 9, value: decimalValue, onChanged: (int value) {
-              setState(() {
-                decimalValue = value;
-              });
-            })
-        ),
-        Text('Kg')
+        SizedBox(
+            height: 120,
+            width: 60,
+            child: NumberPicker(
+                minValue: 0,
+                maxValue: 9,
+                value: decimalValue,
+                onChanged: (int value) {
+                  onDecimalValueChange(value);
+                })),
+        const Text('Kg')
       ],
     );
   }
 }
 
-class HeightPicker extends StatefulWidget {
-  const HeightPicker({super.key});
+class HeightPicker extends StatelessWidget {
+  final int height;
+  final Function(int) onHeightChange;
 
-  @override
-  State<HeightPicker> createState() => _HeightPickerState();
-}
+  const HeightPicker(this.height, this.onHeightChange, {super.key});
 
-class _HeightPickerState extends State<HeightPicker> {
-  int input = 170;
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisSize: MainAxisSize.min,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
-      children: [Text('Height'),
-        SizedBox(width: 24),
-        SizedBox(height: 120,width: 124,
-            child: NumberPicker(minValue: 100, maxValue: 250, value: input, onChanged: (int value) {
-              setState(() {
-                input = value;
-              });
-            })
-        ),
-        Text('cm')
+      children: [
+        const Text('Height'),
+        const SizedBox(width: 24),
+        SizedBox(
+            height: 120,
+            width: 124,
+            child: NumberPicker(
+                minValue: 100,
+                maxValue: 250,
+                value: height,
+                onChanged: (int value) {
+                  onHeightChange(value);
+                })),
+        const Text('cm')
       ],
     );
   }
 }
 
+class BmiResult extends StatelessWidget {
+  final String result;
+  const BmiResult(this.result, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('Your BMI is $result');
+  }
+}
 
